@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wobkot — PS4 WebKit Host</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>Wobkot — PS4</h1>
+      <p class="sub">Host statis &amp; offline untuk rantai WebKit PlayStation 4.</p>
+
+      <div id="status" class="status">Mendeteksi konsol&hellip;</div>
+
+      <table id="info" class="info" hidden>
+        <tbody>
+          <tr><th>Konsol</th><td>PlayStation 4</td></tr>
+          <tr><th>Firmware</th><td id="i-fw">-</td></tr>
+          <tr><th>Status</th><td id="i-status">-</td></tr>
+          <tr><th>Payload</th><td>src/ps4/payload.bin</td></tr>
+        </tbody>
+      </table>
+
+      <p id="hint" class="hint"></p>
+
+      <a id="start" class="btn" href="loader.html" hidden>Jalankan Exploit</a>
+      <p class="foot">
+        <a href="offline.html">Install / perbarui cache offline</a> &middot;
+        <a href="loader.html?simulate=ps4-12.00">Pratinjau log (simulasi PS4 12.00)</a>
+      </p>
+    </main>
+
+    <script>
+      (function () {
+        const $ = (id) => document.getElementById(id);
+        const params = new URLSearchParams(location.search);
+
+        // AppCache: kunjungan pertama memasang cache sebelum exploit dijalankan.
+        // ?skipcache=1 melewati pengecekan AppCache (misalnya saat debugging).
+        const ac = window.applicationCache;
+        if (ac && ac.status === 0 && !params.has('simulate') && !params.has('skipcache')) {
+          location.replace('offline.html');
+          return;
+        }
+
+        let ua = navigator.userAgent;
+        const sim = params.get('simulate');
+        if (sim) ua = `PlayStation 4 ${sim.split('-')[1] || '12.00'}`;
+
+        const m = /PlayStation\s+4[/ ]([0-9.]+)/.exec(ua);
+        const status = $('status');
+
+        if (!m) {
+          status.className = 'status bad';
+          status.textContent = 'Hanya PlayStation 4 yang didukung.';
+          $('hint').textContent = 'Buka dari browser PS4, atau gunakan ?simulate=ps4-12.00 untuk pratinjau.';
+          return;
+        }
+
+        const fw = m[1];
+        const parts = fw.split('.');
+        const major = Number.parseInt(parts[0], 10);
+        const minor = Number.parseInt(parts[1] || '0', 16); // minor firmware dibaca heksadesimal
+        const supported = major < 12 || (major === 12 && minor <= 2);
+
+        $('i-fw').textContent = fw;
+        $('i-status').textContent = supported ? 'Didukung' : 'Belum didukung';
+        $('info').hidden = false;
+
+        if (!supported) {
+          status.className = 'status bad';
+          status.textContent = `Firmware ${fw} belum didukung.`;
+          $('hint').textContent = 'Rantai ini hanya mencakup FW 12.02 ke bawah (lihat src/ps4/impl.js).';
+          return;
+        }
+
+        status.className = 'status ok';
+        status.textContent = `Dideteksi: PS4 ${fw} — siap.`;
+        $('hint').textContent = 'Exploit akan berjalan otomatis dalam 3 detik. Tekan tombol jika tidak mulai.';
+
+        const btn = $('start');
+        btn.hidden = false;
+        if (params.has('simulate')) btn.href = `loader.html?simulate=${encodeURIComponent(sim)}`;
+        btn.focus();
+
+        if (!params.has('simulate')) {
+          setTimeout(() => location.replace(btn.href), 3000);
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wobkot Loader — PS4</title>
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      // Override User-Agent hanya untuk melihat log dari browser desktop.
+      // Contoh: loader.html?simulate=ps4-12.00
+      (function () {
+        const sim = new URLSearchParams(location.search).get('simulate');
+        if (!sim) return;
+        const [kind, fw] = sim.split('-');
+        const ua = `PlayStation ${kind.slice(2)} ${fw}`;
+        Object.defineProperty(navigator, 'userAgent', { get: () => ua, configurable: true });
+      })();
+    </script>
+    <script src="src/main.js" defer></script>
+  </head>
+  <body class="console">
+    <div id="console"></div>
+  </body>
+</html>

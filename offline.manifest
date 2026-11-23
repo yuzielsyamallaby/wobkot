@@ -1,0 +1,23 @@
+CACHE MANIFEST
+# v1.1.0-ps4 - Wobkot PS4 WebKit host
+# Ubah nomor versi di atas jika ada file yang diganti, lalu buka offline.html
+# sekali lagi agar konsol mengunduh ulang isi cache.
+
+CACHE:
+./
+index.html
+loader.html
+offline.html
+style.css
+src/main.js
+src/misc.js
+src/userland.js
+src/kernel.js
+src/lapse.js
+src/thread.js
+src/worker.js
+src/ps4/impl.js
+src/ps4/payload.bin
+
+FALLBACK:
+./ index.html

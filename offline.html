@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id" manifest="offline.manifest">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Install Offline Cache — PS4</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>Install Offline Cache</h1>
+      <p class="sub">Mengunduh semua file exploit + payload ke browser konsol.</p>
+      <div id="msgs" class="status">Starting cache installation&hellip;</div>
+      <p class="foot">Jangan tutup browser sampai proses selesai.</p>
+    </main>
+
+    <script>
+      (function () {
+        const msgs = document.getElementById('msgs');
+        const ac = window.applicationCache;
+
+        // Saat browser dibuka ulang, alamat langsung kembali ke index.html.
+        history.replaceState(null, null, 'index.html');
+
+        if (!ac) {
+          msgs.className = 'status bad';
+          msgs.textContent = 'Browser ini tidak mendukung AppCache. Buka dari browser PlayStation 4.';
+          return;
+        }
+
+        function done(text) {
+          msgs.className = 'status ok';
+          msgs.textContent = text + ' — Matikan WiFi, buka ulang browser, lalu buka alamat PERSIS yang sama (.../index.html).';
+        }
+
+        function progress(e) {
+          const pct = e.lengthComputable ? Math.round((e.loaded / e.total) * 100) : 0;
+          msgs.textContent = `Installing offline cache: ${pct}%`;
+        }
+
+        ac.addEventListener('progress', progress, false);
+        ac.addEventListener('checking', () => { msgs.textContent = 'Checking cache…'; }, false);
+        ac.addEventListener('downloading', () => { msgs.textContent = 'Downloading exploit files…'; }, false);
+        ac.addEventListener('cached', () => { done('Cache installed successfully'); }, false);
+        ac.addEventListener('updateready', () => { done('Cache updated successfully'); }, false);
+        ac.addEventListener('obsolete', () => {
+          msgs.className = 'status bad';
+          msgs.textContent = 'Cache dihapus server. Hapus data browser lalu muat ulang.';
+        }, false);
+        ac.addEventListener('error', () => {
+          msgs.className = 'status bad';
+          msgs.textContent = 'Gagal install cache. Hapus data browser PS4, lalu coba lagi.';
+        }, false);
+
+        if (ac.status === ac.UPDATEREADY) {
+          ac.swapCache();
+          done('Cache updated successfully');
+        } else if (ac.status === ac.IDLE || ac.status === ac.NOUPDATE) {
+          done('Cache already installed');
+        }
+      })();
+    </script>
+  </body>
+</html>
